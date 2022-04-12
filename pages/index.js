@@ -11,31 +11,55 @@ const uploadImages = async (file) => {
       Authorization: `${process.env.NEXT_PUBLIC_NFTPORT_API_KEY}`,
     },
   };
-  fetch('https://api.nftport.xyz/v0/files', options)
+
+  return await fetch('https://api.nftport.xyz/v0/files', options)
     .then((res) => {
       return res.json();
     })
     .then((res) => {
       console.log(res);
-      return res;
+      return res.ipfs_url;
     });
+};
+
+const uploadMetadata = async (collection, supply, metadata) => {
+  fetch(
+    `http://localhost:3000/api/metadata?collection=${collection}&supply=${supply}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ metadata }),
+    }
+  );
 };
 
 export default function Home() {
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
-    const imageUrl = uploadImages(image);
+    const imageUrl = await uploadImages(image);
     const formData = new FormData(document.querySelector('form'));
+    await uploadMetadata(
+      formData.get('collection'),
+      formData.get('max_supply'),
+      {
+        name: formData.get('name'),
+        description: formData.get('description'),
+        image: imageUrl,
+      }
+    );
+
     formData.append('file', image);
     console.log(formData.values());
     console.log(JSON.stringify(formData.values()));
     console.log(formData.get('name'));
+    setLoading(false);
   };
 
   return (
@@ -61,6 +85,7 @@ export default function Home() {
               <input
                 className="w-full"
                 type="file"
+                required
                 onChange={handleImageChange}
               />
             </div>
@@ -69,6 +94,7 @@ export default function Home() {
                 className="w-full"
                 type="text"
                 placeholder="Collection Name"
+                required
                 name="collection"
               />
             </div>
@@ -77,6 +103,7 @@ export default function Home() {
                 className="w-full"
                 type="text"
                 placeholder="Collection Symbol"
+                required
                 name="symbol"
               />
             </div>
@@ -85,6 +112,7 @@ export default function Home() {
                 className="w-full"
                 type="text"
                 placeholder="Collection Owner Address"
+                required
                 name="owner_address"
               />
             </div>
@@ -93,6 +121,7 @@ export default function Home() {
                 className="w-full"
                 type="text"
                 placeholder="Collection Treasury Address"
+                required
                 name="treasury_address"
               />
             </div>
@@ -104,6 +133,7 @@ export default function Home() {
                 className="w-full"
                 type="date"
                 placeholder="Collection Treasury Address"
+                required
                 name="public_mint_start_date"
                 id="public_mint_start_date"
               />
@@ -113,6 +143,7 @@ export default function Home() {
                 className="w-full"
                 type="number"
                 placeholder="Number of NFTs"
+                required
                 name="max_supply"
               />
             </div>
@@ -121,6 +152,7 @@ export default function Home() {
                 className="w-full"
                 type="text"
                 placeholder="Individual NFT Name"
+                required
                 name="name"
               />
             </div>
@@ -129,6 +161,7 @@ export default function Home() {
                 className="w-full"
                 type="text"
                 placeholder="Individual NFT Description"
+                required
                 name="description"
               />
             </div>
@@ -137,11 +170,14 @@ export default function Home() {
                 className="w-full"
                 type="number"
                 placeholder="Mint Price per NFT"
+                required
                 name="mint_price"
               />
             </div>
-            <div className="my-1 bg-slate-300 cursor-pointer flex justify-center p-1 rounded">
-              <button type="submit">Generate Collection</button>
+            <div className="my-1 bg-slate-300 cursor-pointer flex justify-center p-1 rounded disabled:bg-slate-600">
+              <button disabled={loading} type="submit">
+                Generate Collection
+              </button>
             </div>
           </form>
         </div>
