@@ -52,6 +52,7 @@ const createCollection = async (formData) => {
 
 export default function Home() {
   const [image, setImage] = useState(null);
+  const [transactionUrl, setTransactionUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e) => {
@@ -73,7 +74,7 @@ export default function Home() {
       }
     );
 
-    await createCollection({
+    const transaction = await createCollection({
       chain: 'polygon',
       name: formData.get('collection'),
       max_supply: formData.get('max_supply'),
@@ -84,6 +85,8 @@ export default function Home() {
       treasury_address: formData.get('treasury_address'),
       public_mint_start_date: formData.get('public_mint_start_date'),
     });
+
+    setTransactionUrl(transaction.transaction_external_url);
 
     setLoading(false);
   };
@@ -214,6 +217,9 @@ export default function Home() {
                 Generate Collection
               </button>
             </div>
+            {!!transactionUrl.length && (
+              <a href={transactionUrl}>View Transaction External URL</a>
+            )}
           </form>
         </div>
         <div>
