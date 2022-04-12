@@ -1,6 +1,11 @@
 import Head from 'next/head';
 import { useState } from 'react';
 
+const BASE_URL =
+  process.env.NEXT_PUBLIC_NODE_ENV === 'prod'
+    ? 'https://nft-collection-generator.vercel.app'
+    : 'http://localhost:3000';
+
 const uploadImages = async (file) => {
   const body = new FormData();
   body.append('file', file);
@@ -23,13 +28,10 @@ const uploadImages = async (file) => {
 };
 
 const uploadMetadata = async (collection, supply, metadata) => {
-  fetch(
-    `http://localhost:3000/api/metadata?collection=${collection}&supply=${supply}`,
-    {
-      method: 'POST',
-      body: JSON.stringify({ metadata }),
-    }
-  );
+  fetch(`${BASE_URL}/api/metadata?collection=${collection}&supply=${supply}`, {
+    method: 'POST',
+    body: JSON.stringify({ metadata }),
+  });
 };
 
 const createCollection = async (formData) => {
