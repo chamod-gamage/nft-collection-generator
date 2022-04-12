@@ -32,6 +32,24 @@ const uploadMetadata = async (collection, supply, metadata) => {
   );
 };
 
+const createCollection = async (formData) => {
+  fetch('https://api.nftport.xyz/v0/contracts/collections', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${process.env.NEXT_PUBLIC_NFTPORT_API_KEY}`,
+    },
+    body: JSON.stringify(formData),
+  })
+    .then((response) => {
+      console.log(response);
+      return response;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
+
 export default function Home() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -55,10 +73,18 @@ export default function Home() {
       }
     );
 
-    formData.append('file', image);
-    console.log(formData.values());
-    console.log(JSON.stringify(formData.values()));
-    console.log(formData.get('name'));
+    await createCollection({
+      chain: 'polygon',
+      name: formData.get('collection'),
+      max_supply: formData.get('max_supply'),
+      symbol: formData.get('symbol'),
+      mint_price: formData.get('mint_price'),
+      tokens_per_mint: formData.get('tokens_per_mint'),
+      owner_address: formData.get('owner_address'),
+      treasury_address: formData.get('treasury_address'),
+      public_mint_start_date: formData.get('public_mint_start_date'),
+    });
+
     setLoading(false);
   };
 
@@ -163,6 +189,15 @@ export default function Home() {
                 placeholder="Individual NFT Description"
                 required
                 name="description"
+              />
+            </div>
+            <div>
+              <input
+                className="w-full"
+                type="number"
+                placeholder="Tokens per Mint"
+                required
+                name="tokens_per_mint"
               />
             </div>
             <div>
