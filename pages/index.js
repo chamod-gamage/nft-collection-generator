@@ -35,7 +35,7 @@ const uploadMetadata = async (collection, supply, metadata) => {
 };
 
 const createCollection = async (formData) => {
-  fetch('https://api.nftport.xyz/v0/contracts/collections', {
+  return await fetch('https://api.nftport.xyz/v0/contracts/collections', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -45,7 +45,10 @@ const createCollection = async (formData) => {
   })
     .then((response) => {
       console.log(response);
-      return response;
+      return response.json();
+    })
+    .then((res) => {
+      return res;
     })
     .catch((err) => {
       console.error(err);
@@ -87,6 +90,7 @@ export default function Home() {
       treasury_address: formData.get('treasury_address'),
       public_mint_start_date: formData.get('public_mint_start_date'),
     });
+    console.log(transaction);
 
     setTransactionUrl(transaction.transaction_external_url);
 
@@ -214,11 +218,12 @@ export default function Home() {
                 name="mint_price"
               />
             </div>
-            <div className="my-1 bg-slate-300 cursor-pointer flex justify-center p-1 rounded disabled:bg-slate-600">
+            <div className="my-2 bg-slate-300 cursor-pointer flex justify-center p-1 rounded disabled:bg-slate-600">
               <button disabled={loading} type="submit">
-                Generate Collection
+                {loading ? 'Loading...' : 'Generate Collection'}
               </button>
             </div>
+            {/* <p>{transactionUrl}</p> */}
             {!!transactionUrl.length && (
               <a href={transactionUrl}>View Transaction External URL</a>
             )}
